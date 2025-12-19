@@ -885,7 +885,7 @@ The title should capture the main topic or theme of the conversation. Respond wi
         operationId: RouteId.UpdateChatMessage,
         description: "Update a specific text part in a message",
         tags: ["Chat"],
-        params: z.object({ id: UuidIdSchema }),
+        params: z.object({ id: z.string().uuid() }),
         body: z.object({
           partIndex: z.number().int().min(0),
           text: z.string().min(1),
@@ -903,6 +903,11 @@ The title should capture the main topic or theme of the conversation. Respond wi
       },
       reply,
     ) => {
+      // Ensure user is authenticated (defensive check)
+      if (!user) {
+        throw new ApiError(401, "Authentication required");
+      }
+
       // Fetch the message to get its conversation ID
       const message = await MessageModel.findById(id);
 
